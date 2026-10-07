@@ -1,0 +1,47 @@
+# Local configuration and credentials
+/config.ini
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+/.aws/
+
+# Model weights and exported models (provision separately)
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.safetensors
+*.engine
+
+# Runtime outputs and local input data
+*.log
+*.log.*
+/outputs/
+/uploads/
+/data/
+/datasets/
+/multiembryo image.png
+
+# Python environments and caches
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# Local editor and assistant settings
+.idea/
+.vscode/
+.codex/
+.agents/
+.DS_Store
