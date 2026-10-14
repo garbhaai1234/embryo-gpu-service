@@ -217,3 +217,31 @@ git push -u origin main
 For subsequent changes, review `git diff`, stage the intended files with
 `git add <file>`, then commit and push. Keep credentials and patient images out
 of source files and documentation as well as configuration files.
+
+
+## Consolidated image analysis
+
+`POST /v1/image-analysis` accepts multipart `file` and `stage` (`day3`, `day4`,
+`day5`, or another positive day). It returns `predicted_grade`,
+`confidence_score`, `morphology`, `metrics`, `masks`, and `color_map` in one call.
+Day 3 returns cells/zona-pellucida masks and cell/zona morphology measurements.
+Day 4 additionally returns morula, compaction, and fragmentation masks and
+percentages. Day 5 returns Gardner morphology. Other days return grading with
+empty masks and metrics. Requests use the existing `X-API-Key` authentication.
+
+The six required `.pt` checkpoints are tracked with Git LFS. On the GPU host:
+
+```bash
+git pull --ff-only
+git lfs install
+git lfs pull
+python -m pip install -r requirements-image-analysis.txt
+```
+
+Keep the GPU CUDA-compatible PyTorch installation and existing detector
+configuration/checkpoint. Configure the model filenames shown in `.env.example`
+in the protected `.env` or service environment. Relative model paths resolve
+from this repository. Missing files fail startup; no checkpoint is substituted.
+Restart the existing embryo service after pulling. Its normal `main:app` startup
+now registers the image-analysis endpoint without changing its launch command.
+Do not replace the existing API key or detector configuration with the example.

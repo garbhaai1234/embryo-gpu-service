@@ -45,3 +45,11 @@ dist/
 .codex/
 .agents/
 .DS_Store
+
+# Required image-analysis checkpoints are versioned with Git LFS.
+!/CellsYolo26x.pt
+!/EmbryoAndPolarBodyYolo26x.pt
+!/MorulaYolo26Large.pt
+!/best.pt
+!/best_convnextv2_base.pt
+!/best_gardners.pt

@@ -1,0 +1,26 @@
+{
+  "CellsYolo26x.pt": {
+    "sha256": "189dab5a9e83ec050748c35a48ae5ac9f90995693df0cfebf3a441c63d207cc7",
+    "size": 565249561
+  },
+  "EmbryoAndPolarBodyYolo26x.pt": {
+    "sha256": "c4be3994c69d40534ea194c1272a107aab60ff52c6dc285d13e046a9df65b3ae",
+    "size": 141723781
+  },
+  "MorulaYolo26Large.pt": {
+    "sha256": "9467c6d05daefc76dbd32c8ff5fd4cef675397ab1047b7f3a225d2c34c869725",
+    "size": 63443589
+  },
+  "best.pt": {
+    "sha256": "94163bd13ae57f5535b60ce6de761a84e090556da19999903e57762be3ee4954",
+    "size": 51200793
+  },
+  "best_convnextv2_base.pt": {
+    "sha256": "cc762c79f6c83e4768a1e1fe9f23278e852678bc263a1840b0cfccae2c0b3218",
+    "size": 350427103
+  },
+  "best_gardners.pt": {
+    "sha256": "f22314170ee692f0d8e0e0e9d80c1d5cfe355c553a6855a66e98286d172c907e",
+    "size": 350979409
+  }
+}

@@ -18,6 +18,8 @@ Endpoints:
 """
 
 import os
+import sys
+from dotenv import load_dotenv
 from typing import Any, Dict, List, Optional
 import io
 import base64
@@ -57,6 +59,29 @@ yolo_logger = logging.getLogger("embryo.yolo")
 
 # ── Config ──────────────────────────────────────────────────────────────
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_BASE_DIR, ".env"), override=False)
+# Use the exact configured checkpoints. Resolve relative paths from this service.
+for _key, _default in {
+    "PB_WEIGHTS": "EmbryoAndPolarBodyYolo26x.pt",
+    "MORULA_WEIGHTS": "MorulaYolo26Large.pt",
+    "CELL_WEIGHTS": "CellsYolo26x.pt",
+    "FRAG_WEIGHTS": "best.pt",
+    "EMBRYO_WEIGHTS": "EmbryoAndPolarBodyYolo26x.pt",
+}.items():
+    _path = os.path.expanduser(os.environ.get(_key, _default))
+    if not os.path.isabs(_path):
+        _path = os.path.join(_BASE_DIR, _path)
+    if not os.path.isfile(_path):
+        raise RuntimeError(f"Missing configured checkpoint: {_key}={_path}")
+    os.environ[_key] = _path
+for _old, _new in {
+    "EMBRYO_CLASSIFIER_MODEL_PATH": "EMBRYO_MODELS_CLASSIFIER_PATH",
+    "GARDNER_MODEL_PATH": "EMBRYO_MODELS_GARDNERS_PATH",
+}.items():
+    if os.environ.get(_old):
+        _path = os.path.expanduser(os.environ[_old])
+        os.environ[_new] = _path if os.path.isabs(_path) else os.path.join(_BASE_DIR, _path)
+
 _config = configparser.ConfigParser()
 _config.read(os.path.join(_BASE_DIR, "config.ini"))
 
@@ -1184,6 +1209,10 @@ register_esco_focal_plane_morphokinetics(
     esco_bridge_base_url=_cfg("esco_bridge", "base_url", "http://35.238.224.167:8787"),
     esco_bridge_api_key=_cfg("esco_bridge", "api_key", ""),
 )
+
+
+from inference_runtime.embryo import extend
+extend(sys.modules[__name__])
 
 
 if __name__ == "__main__":
