@@ -22,6 +22,8 @@ def test_new_embryo_contract_preserves_preprocessing_and_scores(monkeypatch):
             "color_map": {"cells": [0, 255, 0], "morula": [255, 0, 0]},
             "metrics": {"cell_count": 8, "compaction_percentage": 60, "fragmentation_percentage": 12}})
     monkeypatch.setitem(sys.modules, "inference_runtime.segmentation", segmentation)
+    import inference_runtime
+    monkeypatch.setattr(inference_runtime, "segmentation", segmentation, raising=False)
     seen = []
     def transform(image):
         seen.append(image.size)

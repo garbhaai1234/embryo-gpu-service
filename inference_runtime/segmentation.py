@@ -38,7 +38,7 @@ CELL_WEIGHTS = os.environ.get("CELL_WEIGHTS", "")
 FRAG_WEIGHTS = os.environ.get("FRAG_WEIGHTS", "")
 EMBRYO_WEIGHTS = os.environ.get("EMBRYO_WEIGHTS", "")
 
-CLASS_NAME_PB = "zona-pellucida"
+CLASS_NAME_PB = "polar-body"
 CLASS_NAME_MORULA = "Morula"
 CLASS_NAME_CELL = "cell"
 CLASS_NAME_FRAG = "Fragments"
@@ -65,11 +65,7 @@ def _normalize_class_name(name: str) -> str:
 
 def _match_class_ids(names: dict, class_name: str) -> list[int]:
     target = _normalize_class_name(class_name)
-    exact = [k for k, v in names.items() if _normalize_class_name(v) == target]
-    if exact:
-        return exact
-    # Fallback: substring match for mild naming differences
-    return [k for k, v in names.items() if target in _normalize_class_name(v) or _normalize_class_name(v) in target]
+    return [k for k, v in names.items() if _normalize_class_name(v) == target]
 
 
 def preprocess_image(image):
@@ -411,12 +407,11 @@ def infer_cell_mask_filtered_by_morula(
     if r.masks is None or r.boxes is None or len(r.boxes) == 0:
         return np.zeros((h0, w0), np.uint8), {"reason": "no_cell_detections"}
 
-    target_id = None
+    target_ids = None
     if cell_class_name is not None:
-        name_to_id = {v: k for k, v in model.names.items()}
-        if cell_class_name not in name_to_id:
+        target_ids = _match_class_ids(model.names, cell_class_name)
+        if not target_ids:
             raise ValueError(f"'{cell_class_name}' not in {list(model.names.values())}")
-        target_id = name_to_id[cell_class_name]
 
     masks = r.masks.data.cpu().numpy()
     cls_ids = r.boxes.cls.cpu().numpy().astype(int)
@@ -434,7 +429,7 @@ def infer_cell_mask_filtered_by_morula(
     union_modelspace = np.zeros((mh, mw), dtype=np.uint8)
 
     for m_i, cid in zip(masks, cls_ids):
-        if target_id is not None and cid != target_id:
+        if target_ids is not None and cid not in target_ids:
             continue
 
         inst_model = (m_i > 0.5).astype(np.uint8)
@@ -520,17 +515,16 @@ def infer_morula_mask_stretch(
     if r.masks is None or r.boxes is None or len(r.boxes) == 0:
         return np.zeros((h0, w0), np.uint8), r, model.names
 
-    name_to_id = {v: k for k, v in model.names.items()}
-    if target_class_name not in name_to_id:
+    target_ids = _match_class_ids(model.names, target_class_name)
+    if not target_ids:
         raise ValueError(f"'{target_class_name}' not in {list(model.names.values())}")
-    tid = name_to_id[target_class_name]
 
     masks = r.masks.data.cpu().numpy()
     cls_ids = r.boxes.cls.cpu().numpy().astype(int)
 
     union = np.zeros(masks.shape[1:], dtype=np.uint8)
     for m, cid in zip(masks, cls_ids):
-        if cid == tid:
+        if cid in target_ids:
             union = np.maximum(union, (m > 0.5).astype(np.uint8))
 
     union = cv2.resize(union, (w0, h0), interpolation=cv2.INTER_NEAREST)
